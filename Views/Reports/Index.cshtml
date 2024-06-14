@@ -1,0 +1,36 @@
+﻿@model IEnumerable<Lwesihlanu.Models.Report>
+
+@{
+    ViewData["Title"] = "Reports";
+}
+
+<h2>Reports</h2>
+
+<a asp-action="Create" class="btn btn-primary">Create New Report</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Selected Columns</th>
+            <th>Format</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var report in Model)
+        {
+            <tr>
+                <td>@report.Name</td>
+                <td>@report.Description</td>
+                <td>@report.SelectedColumns</td>
+                <td>@report.Format</td>
+                <td>
+                   @*  <a asp-action="Clone" asp-route-id="@report.ReportId" class="btn btn-secondary">Clone</a> *@
+                    <a asp-action="Delete" asp-route-id="@report.ReportId" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

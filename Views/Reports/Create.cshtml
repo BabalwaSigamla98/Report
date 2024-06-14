@@ -1,0 +1,38 @@
+﻿@model IEnumerable<Lwesihlanu.Models.ReportColumn>
+
+@{
+    ViewData["Title"] = "Create Report";
+}
+
+<h2>Create Report</h2>
+
+<form asp-action="SaveReportConfiguration" method="post">
+    <div>
+        <label>Report Name</label>
+        <input type="text" name="reportName" required />
+    </div>
+    <div>
+        <label>Description</label>
+        <input type="text" name="description" required />
+    </div>
+    <div>
+        <label>Format</label>
+        <select name="format" required>
+            <option value="csv">CSV</option>
+            <option value="excel">Excel</option>
+            <option value="pdf">PDF</option>
+        </select>
+    </div>
+    <div>
+        <label>Select Columns</label>
+        <ul>
+            @foreach (var column in Model)
+            {
+                <li>
+                    <input type="checkbox" name="selectedColumnIds" value="@column.ColumnId" /> @column.Name
+                </li>
+            }
+        </ul>
+    </div>
+    <button type="submit">Save Report Configuration</button>
+</form>

@@ -1,0 +1,12 @@
+﻿@model Lwesihlanu.Models.Report
+
+<h1>Report Details</h1>
+
+<div>
+    <h4>Name: @Model.Name</h4>
+    <h4>Description: @Model.Description</h4>
+    <h4>Created Date: @Model.CreatedDate.ToShortDateString()</h4>
+</div>
+
+<a asp-action="Index">Back to List</a>
+

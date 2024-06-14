@@ -1,0 +1,29 @@
+﻿@model IEnumerable<dynamic>
+
+@{
+    ViewData["Title"] = "Report View";
+}
+
+<h2>Report</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            @foreach (var property in Model.FirstOrDefault()?.GetType().GetProperties())
+            {
+                <th>@property.Name</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                @foreach (var property in item.GetType().GetProperties())
+                {
+                    <td>@property.GetValue(item, null)</td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>

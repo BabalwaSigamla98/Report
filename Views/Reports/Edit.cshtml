@@ -1,0 +1,24 @@
+﻿@model Lwesihlanu.Models.Report
+
+<h1>Edit Report</h1>
+
+<form asp-action="Edit">
+    <input type="hidden" asp-for="ReportId" />
+    <div class="form-group">
+        <label>Name</label>
+        <input asp-for="Name" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Description</label>
+        <input asp-for="Description" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Selected Columns</label>
+        <input asp-for="SelectedColumns" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Format</label>
+        <input asp-for="Format" class="form-control" />
+    </div>
+    <button type="submit">Save</button>
+</form>
