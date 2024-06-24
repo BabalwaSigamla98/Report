@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Lwesihlanu.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240613122217_sizobona")]
-    partial class sizobona
+    [Migration("20240618051607_Jonga")]
+    partial class Jonga
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -77,12 +77,7 @@ namespace Lwesihlanu.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ReportId")
-                        .HasColumnType("int");
-
                     b.HasKey("ColumnId");
-
-                    b.HasIndex("ReportId");
 
                     b.ToTable("ReportColumns");
                 });
@@ -124,22 +119,6 @@ namespace Lwesihlanu.Migrations
                         .IsRequired();
 
                     b.Navigation("UserReport");
-                });
-
-            modelBuilder.Entity("Lwesihlanu.Models.ReportColumn", b =>
-                {
-                    b.HasOne("Lwesihlanu.Models.Report", "Report")
-                        .WithMany("ReportColumns")
-                        .HasForeignKey("ReportId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Report");
-                });
-
-            modelBuilder.Entity("Lwesihlanu.Models.Report", b =>
-                {
-                    b.Navigation("ReportColumns");
                 });
 
             modelBuilder.Entity("Lwesihlanu.Models.UserReport", b =>

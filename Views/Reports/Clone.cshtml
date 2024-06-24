@@ -1,23 +1,50 @@
 ﻿@model Lwesihlanu.Models.Report
 
-<h1>Clone Report</h1>
+@{
+    ViewData["Title"] = "Clone Report";
+}
 
-<form asp-action="Clone">
-    <div class="form-group">
-        <label>Name</label>
-        <input asp-for="Name" class="form-control" />
+<h2>Clone Report</h2>
+
+<h4>Report</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Clone">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ReportId" />
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" value="@Model.Name + " (Clone)"" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <input asp-for="Description" class="form-control" value="@Model.Description" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SelectedColumns" class="control-label"></label>
+                <input asp-for="SelectedColumns" class="form-control" value="@Model.SelectedColumns" />
+                <span asp-validation-for="SelectedColumns" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Format" class="control-label"></label>
+                <input asp-for="Format" class="form-control" value="@Model.Format" />
+                <span asp-validation-for="Format" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CreatedDate" class="control-label"></label>
+                <input asp-for="CreatedDate" class="form-control" value="@DateTime.Now" />
+                <span asp-validation-for="CreatedDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Clone" class="btn btn-primary" />
+            </div>
+        </form>
     </div>
-    <div class="form-group">
-        <label>Description</label>
-        <input asp-for="Description" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label>Selected Columns</label>
-        <input asp-for="SelectedColumns" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label>Format</label>
-        <input asp-for="Format" class="form-control" />
-    </div>
-    <button type="submit">Clone</button>
-</form>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

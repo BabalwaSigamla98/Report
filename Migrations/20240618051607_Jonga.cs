@@ -6,11 +6,25 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Lwesihlanu.Migrations
 {
     /// <inheritdoc />
-    public partial class sizobona : Migration
+    public partial class Jonga : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "ReportColumns",
+                columns: table => new
+                {
+                    ColumnId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsSelected = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ReportColumns", x => x.ColumnId);
+                });
+
             migrationBuilder.CreateTable(
                 name: "UserReports",
                 columns: table => new
@@ -50,32 +64,6 @@ namespace Lwesihlanu.Migrations
                         principalColumn: "UserReportId",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateTable(
-                name: "ReportColumns",
-                columns: table => new
-                {
-                    ColumnId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsSelected = table.Column<bool>(type: "bit", nullable: false),
-                    ReportId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ReportColumns", x => x.ColumnId);
-                    table.ForeignKey(
-                        name: "FK_ReportColumns_Reports_ReportId",
-                        column: x => x.ReportId,
-                        principalTable: "Reports",
-                        principalColumn: "ReportId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ReportColumns_ReportId",
-                table: "ReportColumns",
-                column: "ReportId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reports_QueryId",

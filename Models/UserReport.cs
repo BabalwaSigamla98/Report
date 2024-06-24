@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Lwesihlanu.Models
 {
@@ -16,5 +16,4 @@ namespace Lwesihlanu.Models
         // Navigation property for related reports
         public ICollection<Report> Reports { get; set; }
     }
-
 }

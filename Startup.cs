@@ -1,5 +1,6 @@
 ﻿using Lwesihlanu.Models;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
 
 namespace Lwesihlanu
 {
@@ -16,7 +17,7 @@ namespace Lwesihlanu
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial; // or LicenseContext.Commercial
             // Configure DbContext
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
