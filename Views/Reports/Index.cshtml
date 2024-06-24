@@ -1,48 +1,36 @@
 ﻿@model IEnumerable<Lwesihlanu.Models.Report>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Reports";
 }
 
 <h2>Reports</h2>
 
+<a asp-action="Create" class="btn btn-primary">Create New Report</a>
+
 <table class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.First().Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.First().Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.First().CreatedDate)
-            </th>
-            <th></th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Selected Columns</th>
+            <th>Format</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var report in Model)
         {
             <tr>
+                <td>@report.Name</td>
+                <td>@report.Description</td>
+                <td>@report.SelectedColumns</td>
+                <td>@report.Format</td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Description)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.CreatedDate)
-                </td>
-                <td>
-                @*     <a asp-action="Edit" asp-route-id="@item.ReportId">Edit</a> | *@
-                    <a asp-action="Delete" asp-route-id="@item.ReportId">Delete</a> |
-                    <a asp-action="Clone" asp-route-id="@item.ReportId">Clone</a> |
-                    <a asp-action="Run" asp-route-id="@item.ReportId">Run</a>
+                   @*  <a asp-action="Clone" asp-route-id="@report.ReportId" class="btn btn-secondary">Clone</a> *@
+                    <a asp-action="Delete" asp-route-id="@report.ReportId" class="btn btn-danger">Delete</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
-
-<a asp-action="Create">Create New</a>

@@ -20,5 +20,8 @@ namespace Lwesihlanu.Models
 
         // Navigation property
         public UserReport UserReport { get; set; }
+
+        // Navigation property for related ReportColumns
+        public ICollection<ReportColumn> ReportColumns { get; set; }
     }
 }

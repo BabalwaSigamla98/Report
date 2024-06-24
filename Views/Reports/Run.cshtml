@@ -1,48 +1,21 @@
 ﻿@model Lwesihlanu.Models.Report
 
-@{
-    ViewData["Title"] = "Run Report";
-}
+<h1>Run Report: @Model.Name</h1>
 
-<h2>Run Report</h2>
-
-<div>
-    <h4>Report</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.SelectedColumns)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.SelectedColumns)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Format)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Format)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedDate)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.CreatedDate)
-        </dd>
-    </dl>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+<form asp-action="Run">
+    <input type="hidden" asp-for="ReportId" />
+    <div class="form-group">
+        <label>Selected Columns:</label>
+        <ul>
+            @foreach (var column in Model.ReportColumns)
+            {
+                <li>@column.Name</li>
+            }
+        </ul>
+    </div>
+  @*   <div class="form-group">
+        <label>Filters:</label>
+        <input type="text" asp-for="Filters" class="form-control" />
+    </div> *@
+    <button type="submit" class="btn btn-primary">Run Report</button>
+</form>
