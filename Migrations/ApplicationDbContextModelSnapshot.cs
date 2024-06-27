@@ -128,7 +128,7 @@ namespace Lwesihlanu.Migrations
                     b.HasOne("Lwesihlanu.Models.Report", "Report")
                         .WithMany("ReportColumns")
                         .HasForeignKey("ReportId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Report");

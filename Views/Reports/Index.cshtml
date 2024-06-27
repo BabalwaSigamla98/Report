@@ -27,7 +27,7 @@
                 <td>@report.SelectedColumns</td>
                 <td>@report.Format</td>
                 <td>
-                   @*  <a asp-action="Clone" asp-route-id="@report.ReportId" class="btn btn-secondary">Clone</a> *@
+                    <a asp-action="Run" asp-route-id="@report.ReportId" asp-route-format="@report.Format" class="btn btn-success">Download</a>
                     <a asp-action="Delete" asp-route-id="@report.ReportId" class="btn btn-danger">Delete</a>
                 </td>
             </tr>

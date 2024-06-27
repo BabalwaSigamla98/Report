@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Lwesihlanu.Migrations
 {
     /// <inheritdoc />
-    public partial class sizobona : Migration
+    public partial class Isi : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -69,7 +69,7 @@ namespace Lwesihlanu.Migrations
                         column: x => x.ReportId,
                         principalTable: "Reports",
                         principalColumn: "ReportId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(

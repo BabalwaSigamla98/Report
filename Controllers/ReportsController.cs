@@ -1,11 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Lwesihlanu.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using OfficeOpenXml;
 
 public class ReportsController : Controller
 {
@@ -18,7 +22,7 @@ public class ReportsController : Controller
 
     public IActionResult Index()
     {
-        var reports = _context.Reports.ToList();
+        var reports = _context.Reports.Include(r => r.UserReport).ToList();
         return View(reports);
     }
 
@@ -28,9 +32,7 @@ public class ReportsController : Controller
         return View(columns); // Ensure your view is strongly typed to IEnumerable<ReportColumn>
     }
 
-
-
-    public async Task SaveReportConfiguration(string reportName, string description, string[] selectedColumnIds, string format)
+    public async Task<IActionResult> SaveReportConfiguration(string reportName, string description, string[] selectedColumnIds, string format)
     {
         // Convert selectedColumnIds to a list of column names
         var selectedColumns = _context.ReportColumns
@@ -82,16 +84,26 @@ public class ReportsController : Controller
         await _context.SaveChangesAsync();
 
         // Save related ReportColumns
-        var reportColumns = selectedColumnIds.Select(id => new ReportColumn
+        foreach (var columnId in selectedColumnIds)
         {
-            ColumnId = int.Parse(id),
-            ReportId = report.ReportId,
-            IsSelected = true // Assuming selected columns are marked as true
-        }).ToList();
+            var reportColumn = new ReportColumn
+            {
+                ReportId = report.ReportId,
+                IsSelected = true, // Assuming selected columns are marked as true
+                Name = _context.ReportColumns.FirstOrDefault(rc => rc.ColumnId == int.Parse(columnId))?.Name
+            };
 
-        _context.ReportColumns.AddRange(reportColumns);
+            if (reportColumn.Name != null)
+            {
+                _context.ReportColumns.Add(reportColumn);
+            }
+        }
+
         await _context.SaveChangesAsync();
+
+        return await DownloadReport(report.ReportId, format);
     }
+
 
     // GET: Reports/Delete/5
     public async Task<IActionResult> Delete(int? id)
@@ -119,12 +131,18 @@ public class ReportsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var report = await _context.Reports.FindAsync(id);
+        var report = await _context.Reports
+            .Include(r => r.ReportColumns)
+            .FirstOrDefaultAsync(m => m.ReportId == id);
 
         if (report == null)
         {
             return NotFound();
         }
+
+        // Remove associated ReportColumns
+        var reportColumns = _context.ReportColumns.Where(rc => rc.ReportId == report.ReportId);
+        _context.ReportColumns.RemoveRange(reportColumns);
 
         _context.Reports.Remove(report);
         await _context.SaveChangesAsync();
@@ -132,85 +150,154 @@ public class ReportsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    // Action to Run and Download the report
+    public async Task<IActionResult> Run(int id, string format)
+    {
+        var report = await _context.Reports
+            .FirstOrDefaultAsync(r => r.ReportId == id);
+
+        if (report == null)
+        {
+            return NotFound();
+        }
+
+        var selectedColumns = report.SelectedColumns.Split(',');
+
+        return format.ToLower() switch
+        {
+            "pdf" => GeneratePdfReport(report.Name, selectedColumns),
+            "excel" => GenerateExcelReport(report.Name, selectedColumns),
+            "csv" => GenerateCsvReport(report.Name, selectedColumns),
+            _ => BadRequest("Unsupported format")
+        };
+    }
+
+    private async Task<IActionResult> DownloadReport(int reportId, string format)
+    {
+        var report = await _context.Reports
+            .FirstOrDefaultAsync(r => r.ReportId == reportId);
+
+        if (report == null)
+        {
+            return NotFound();
+        }
+
+        var selectedColumns = report.SelectedColumns.Split(',');
+
+        return format.ToLower() switch
+        {
+            "pdf" => GeneratePdfReport(report.Name, selectedColumns),
+            "excel" => GenerateExcelReport(report.Name, selectedColumns),
+            "csv" => GenerateCsvReport(report.Name, selectedColumns),
+            _ => BadRequest("Unsupported format")
+        };
+    }
+
+    private IActionResult GeneratePdfReport(string reportName, string[] columns)
+    {
+        var stream = new MemoryStream();
+
+        // Create a new PDF document
+        var document = new iTextSharp.text.Document();
+        var writer = iTextSharp.text.pdf.PdfWriter.GetInstance(document, stream);
+        writer.CloseStream = false;
+
+        document.Open();
+
+        // Add title
+        var titleFont = iTextSharp.text.FontFactory.GetFont("Arial", 18, iTextSharp.text.Font.BOLD);
+        var titleParagraph = new iTextSharp.text.Paragraph(reportName, titleFont)
+        {
+            Alignment = iTextSharp.text.Element.ALIGN_CENTER,
+            SpacingAfter = 20
+        };
+        document.Add(titleParagraph);
+
+        // Add table
+        var table = new iTextSharp.text.pdf.PdfPTable(columns.Length);
+
+        // Add headers
+        var headerFont = iTextSharp.text.FontFactory.GetFont("Arial", 12, iTextSharp.text.Font.BOLD);
+        foreach (var column in columns)
+        {
+            var cell = new iTextSharp.text.pdf.PdfPCell(new iTextSharp.text.Phrase(column, headerFont))
+            {
+                HorizontalAlignment = iTextSharp.text.Element.ALIGN_CENTER,
+                BackgroundColor = new iTextSharp.text.BaseColor(240, 240, 240)
+            };
+            table.AddCell(cell);
+        }
+
+        // Add sample data (replace with actual data from your context)
+        var dataFont = iTextSharp.text.FontFactory.GetFont("Arial", 10);
+        for (int row = 1; row <= 10; row++)
+        {
+            foreach (var column in columns)
+            {
+                var cell = new iTextSharp.text.pdf.PdfPCell(new iTextSharp.text.Phrase($"Data {row}", dataFont))
+                {
+                    HorizontalAlignment = iTextSharp.text.Element.ALIGN_CENTER
+                };
+                table.AddCell(cell);
+            }
+        }
+
+        document.Add(table);
+        document.Close();
+        writer.Flush();
+        stream.Position = 0;
+
+        return File(stream, "application/pdf", $"{reportName}.pdf");
+    }
+
+    private IActionResult GenerateExcelReport(string reportName, string[] columns)
+    {
+        var stream = new MemoryStream();
+
+        ExcelPackage.LicenseContext = LicenseContext.NonCommercial; // Set the license context
+
+        using (var package = new ExcelPackage())
+        {
+            var worksheet = package.Workbook.Worksheets.Add(reportName);
+
+            // Add headers
+            for (int i = 0; i < columns.Length; i++)
+            {
+                worksheet.Cells[1, i + 1].Value = columns[i];
+            }
+
+            // Add sample data (replace with actual data from your context)
+            for (int row = 2; row <= 11; row++)
+            {
+                for (int col = 0; col < columns.Length; col++)
+                {
+                    worksheet.Cells[row, col + 1].Value = $"Data {row - 1}";
+                }
+            }
+
+            package.SaveAs(stream);
+        }
+
+        stream.Position = 0;
+        return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{reportName}.xlsx");
+    }
+
+    private IActionResult GenerateCsvReport(string reportName, string[] columns)
+    {
+        var stream = new MemoryStream();
+        var writer = new StreamWriter(stream);
+
+        // Add headers
+        writer.WriteLine(string.Join(",", columns));
+
+        // Add sample data (replace with actual data from your context)
+        for (int row = 1; row <= 10; row++)
+        {
+            writer.WriteLine(string.Join(",", columns.Select(c => $"Data {row}")));
+        }
+
+        writer.Flush();
+        stream.Position = 0;
+        return File(stream, "text/csv", $"{reportName}.csv");
+    }
 }
-
-
-//public IActionResult Clone(int id)
-//{
-//    var existingReport = _context.Reports.FirstOrDefault(r => r.ReportId == id);
-//    if (existingReport == null)
-//    {
-//        return NotFound();
-//    }
-
-//    // Clone report
-//    var clonedReport = new Report
-//    {
-//        Name = existingReport.Name + " (Clone)",
-//        Description = existingReport.Description,
-//        SelectedColumns = existingReport.SelectedColumns,
-//        Format = existingReport.Format,
-//        CreatedDate = DateTime.Now
-//    };
-
-//    _context.Reports.Add(clonedReport);
-//    _context.SaveChanges();
-
-//    // Clone report to UserReport table
-//    var clonedUserReport = new UserReport
-//    {
-//        ReportId = clonedReport.ReportId,
-//        SelectedColumns = clonedReport.SelectedColumns,
-//        QueryText = JsonConvert.SerializeObject("Clone of " + existingReport.Name),
-//        Filters = "tttttt", // Add filter logic if needed
-//        CreatedDate = DateTime.Now
-//    };
-
-//    _context.UserReports.Add(clonedUserReport);
-//    _context.SaveChanges();
-
-//    return RedirectToAction(nameof(Index));
-//}
-
-//public async Task<IActionResult> Delete(int? id)
-//{
-//    if (id == null)
-//    {
-//        return NotFound();
-//    }
-
-//    var report = await _context.Reports
-//        .FirstOrDefaultAsync(m => m.ReportId == id);
-//    if (report == null)
-//    {
-//        return NotFound();
-//    }
-
-//    return View(report);
-//}
-
-//[HttpPost, ActionName("Delete")]
-//[ValidateAntiForgeryToken]
-//public async Task<IActionResult> DeleteConfirmed(int id)
-//{
-//    var report = await _context.Reports.FindAsync(id);
-//    if (report == null)
-//    {
-//        return NotFound();
-//    }
-
-//    // Remove related UserReports
-//    var userReports = _context.UserReports.Where(ur => ur.ReportId == id).ToList();
-//    if (userReports.Any())
-//    {
-//        _context.UserReports.RemoveRange(userReports);
-//    }
-
-//    // Remove the report
-//    _context.Reports.Remove(report);
-
-//    await _context.SaveChangesAsync();
-//    return RedirectToAction(nameof(Index));
-// }
-
-

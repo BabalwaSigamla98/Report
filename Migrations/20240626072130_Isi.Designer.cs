@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Lwesihlanu.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240613122217_sizobona")]
-    partial class sizobona
+    [Migration("20240626072130_Isi")]
+    partial class Isi
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -131,7 +131,7 @@ namespace Lwesihlanu.Migrations
                     b.HasOne("Lwesihlanu.Models.Report", "Report")
                         .WithMany("ReportColumns")
                         .HasForeignKey("ReportId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Report");
